@@ -94,10 +94,13 @@ func main() {
 	for _, hour := range hours {
 		date := time.Unix(hour.TimeEpoch, 0)
 
-		fmt.Printf("%s\n", date.Format("03:04PM"))
+		if date.Before(time.Now()) {
+			continue
+		}
+
+		fmt.Printf(
+			"%s - %.0fF, %.0f%%, %s\n",
+			date.Format("03:04PM"), hour.TempF, hour.ChanceOfRain, hour.Condition.Text)
 	}
 
-	// fmt.Printf(
-	// 	"09:00AM - 75F, 0%, Overcast\n",
-	// 	hours[0].TimeEpoch, hours[0].TempF, hours[0].ChanceOfRain, hours[0].Condition.Text)
 }
