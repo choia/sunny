@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -60,6 +61,15 @@ func main() {
 	q := url.QueryEscape(os.Getenv("DEFAULT_LOCATION"))
 	days := "1"
 	aqi := "yes"
+
+	if len(os.Args) >= 2 {
+
+		if len(os.Args) == 2 {
+			q = url.QueryEscape(os.Args[1])
+		} else {
+			q = url.QueryEscape(strings.Join(os.Args[1:], " "))
+		}
+	}
 
 	fullUrl := baseURL + apikey + "&q=" + q + "&days=" + days + "&aqi=" + aqi
 
