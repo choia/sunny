@@ -52,21 +52,27 @@ type Weather struct {
 
 func main() {
 
+	// loading .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading the .env file.")
 	}
 
+	// construct the url query
 	baseURL := os.Getenv("BASE_URL")
 	apikey := os.Getenv("API_KEY")
 	q := url.QueryEscape(os.Getenv("DEFAULT_LOCATION"))
 	days := "1"
 	aqi := "yes"
 
+	// check for command-line argument
 	if len(os.Args) >= 2 {
 
+		// if there is one argument - ex. sunny.exe "atlanta"
 		if len(os.Args) == 2 {
 			q = url.QueryEscape(os.Args[1])
+
+			// if there is multiple argument, construct as a single query - ex. sunny.exe "los angeles"
 		} else {
 			q = url.QueryEscape(strings.Join(os.Args[1:], " "))
 		}
@@ -74,6 +80,7 @@ func main() {
 
 	fullUrl := baseURL + apikey + "&q=" + q + "&days=" + days + "&aqi=" + aqi
 
+	// fetch a request from weather api
 	res, err := http.Get(fullUrl)
 	if err != nil {
 		panic(err)
@@ -83,11 +90,13 @@ func main() {
 	if res.StatusCode != 200 {
 		panic("Weather API is not available.")
 	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		panic(err)
 	}
 
+	// desconstruct response body onto weather struct
 	var weather Weather
 	err = json.Unmarshal(body, &weather)
 	if err != nil {
@@ -95,19 +104,24 @@ func main() {
 	}
 
 	location, current, hours := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
+
+	// print ex. - Norcross, Georgia: 81F, Partly cloudy - Feels like 83F
 	curr := fmt.Sprintf(
 		"\n%s, %s: %.0fF, %s - Feels like %.0fF\n",
 		location.Name, location.State, current.Temp, current.Condition.Text, current.FeelsLike)
 	color.Yellow(curr)
 
+	// print ex. - Humidity: 72%, Cloud: 75%, UV Index: 7, AQI: 15
 	curr2 := fmt.Sprintf(
 		"Humidity: %d%%, Cloud: %d%%, UV Index: %.0f, AQI: %.0f\n",
 		current.Humidity, current.Cloud, current.UV, current.AirQuality.PM25)
 	color.Cyan(curr2)
 
+	// print ex. dash
 	dash := utf8.RuneCountInString(curr2)
 	fmt.Println(strings.Repeat("-", dash))
 
+	// print ex. - 05:00PM - 86F, 0%, Overcast
 	for _, hour := range hours {
 		date := time.Unix(hour.TimeEpoch, 0)
 
