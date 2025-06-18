@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -81,7 +82,7 @@ func main() {
 		panic(err)
 	}
 
-	location, current, _ := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
+	location, current, hours := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
 	fmt.Printf(
 		"%s, %s: %.0fF, %s - Feels like %.0fF\n",
 		location.Name, location.State, current.Temp, current.Condition.Text, current.FeelsLike)
@@ -89,5 +90,14 @@ func main() {
 	fmt.Printf(
 		"Humidity: %d%%, Cloud: %d%%, UV Index: %.0f, AQI: %.0f\n",
 		current.Humidity, current.Cloud, current.UV, current.AirQuality.PM25)
-	// fmt.Printf("%s", body)
+
+	for _, hour := range hours {
+		date := time.Unix(hour.TimeEpoch, 0)
+
+		fmt.Printf("%s\n", date.Format("03:04PM"))
+	}
+
+	// fmt.Printf(
+	// 	"09:00AM - 75F, 0%, Overcast\n",
+	// 	hours[0].TimeEpoch, hours[0].TempF, hours[0].ChanceOfRain, hours[0].Condition.Text)
 }
