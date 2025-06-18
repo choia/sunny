@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
@@ -95,7 +96,7 @@ func main() {
 
 	location, current, hours := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
 	curr := fmt.Sprintf(
-		"%s, %s: %.0fF, %s - Feels like %.0fF\n",
+		"\n%s, %s: %.0fF, %s - Feels like %.0fF\n",
 		location.Name, location.State, current.Temp, current.Condition.Text, current.FeelsLike)
 	color.Yellow(curr)
 
@@ -103,6 +104,9 @@ func main() {
 		"Humidity: %d%%, Cloud: %d%%, UV Index: %.0f, AQI: %.0f\n",
 		current.Humidity, current.Cloud, current.UV, current.AirQuality.PM25)
 	color.Cyan(curr2)
+
+	dash := utf8.RuneCountInString(curr2)
+	fmt.Println(strings.Repeat("-", dash))
 
 	for _, hour := range hours {
 		date := time.Unix(hour.TimeEpoch, 0)
