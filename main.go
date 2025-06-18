@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -83,13 +84,15 @@ func main() {
 	}
 
 	location, current, hours := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
-	fmt.Printf(
+	curr := fmt.Sprintf(
 		"%s, %s: %.0fF, %s - Feels like %.0fF\n",
 		location.Name, location.State, current.Temp, current.Condition.Text, current.FeelsLike)
+	color.Yellow(curr)
 
-	fmt.Printf(
+	curr2 := fmt.Sprintf(
 		"Humidity: %d%%, Cloud: %d%%, UV Index: %.0f, AQI: %.0f\n",
 		current.Humidity, current.Cloud, current.UV, current.AirQuality.PM25)
+	color.Cyan(curr2)
 
 	for _, hour := range hours {
 		date := time.Unix(hour.TimeEpoch, 0)
@@ -98,9 +101,15 @@ func main() {
 			continue
 		}
 
-		fmt.Printf(
+		message := fmt.Sprintf(
 			"%s - %.0fF, %.0f%%, %s\n",
 			date.Format("03:04PM"), hour.TempF, hour.ChanceOfRain, hour.Condition.Text)
+
+		if hour.ChanceOfRain < 90 {
+			fmt.Print(message)
+		} else {
+			color.Red(message)
+		}
 	}
 
 }
