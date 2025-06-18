@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -14,7 +15,7 @@ import (
 type Weather struct {
 	Location struct {
 		Name      string `json:"name"`
-		State     string `json:"state"`
+		State     string `json:"region"`
 		Country   string `json:"country"`
 		LocalTime string `json:"localtime"`
 	} `json:"location"`
@@ -62,14 +63,31 @@ func main() {
 
 	res, err := http.Get(fullUrl)
 	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
 		panic("Weather API is not available.")
 	}
-	// fmt.Println(fullUrl)
-
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%s", body)
+	var weather Weather
+	err = json.Unmarshal(body, &weather)
+	if err != nil {
+		panic(err)
+	}
+
+	location, current, _ := weather.Location, weather.Current, weather.Forecast.Forecastday[0].Hour
+	fmt.Printf(
+		"%s, %s: %.0fF, %s - Feels like %.0fF\n",
+		location.Name, location.State, current.Temp, current.Condition.Text, current.FeelsLike)
+
+	fmt.Printf(
+		"Humidity: %d%%, Cloud: %d%%, UV Index: %.0f, AQI: %.0f\n",
+		current.Humidity, current.Cloud, current.UV, current.AirQuality.PM25)
+	// fmt.Printf("%s", body)
 }
